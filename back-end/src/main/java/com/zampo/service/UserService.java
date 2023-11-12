@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -40,7 +41,14 @@ public class UserService {
     }
 
     public UserDTO create(@Valid @NotNull UserDTO user) {
-        return userMapper.toDTO(userRepository.save(userMapper.toEntity(user)));
+        String passwordCrypt = new BCryptPasswordEncoder().encode(user.password());
+        User userModify = userMapper.toEntity(user);
+        userModify.setName(user.name());
+        userModify.setEmail(user.email());
+        userModify.setProfile(user.profile());
+        userModify.setStatus(user.status());
+        userModify.setPassword(passwordCrypt);
+        return userMapper.toDTO(userRepository.save(userModify));
     }
 
     public UserDTO update(@NotNull @Positive Long id, @Valid @NotNull UserDTO userDTO) {
